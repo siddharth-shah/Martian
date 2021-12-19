@@ -50,7 +50,6 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation "com.squareup.retrofit2:converter-gson:2.9.0"
     //image
-    implementation 'com.squareup.picasso:picasso:2.9'
     //viewmodels
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0"
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
@@ -61,6 +60,10 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.38.1")
     kapt("com.google.dagger:hilt-android-compiler:2.38.1")
     kapt 'com.google.dagger:hilt-compiler:2.40.5'
+    implementation 'org.mockito:mockito-inline:3.1.0'
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:3.2.0'
+
+
 
 
 }
