@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,9 +20,9 @@ import com.example.martian.photos.model.Photo
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MarsPhotoListFragment : Fragment() {
+class MarsPhotoListFragment : Fragment(), PhotoItemClickListener {
 
-    private val photoListViewModel: PhotoListViewModel by viewModels()
+    private val photoListViewModel: PhotoListViewModel by activityViewModels()
     private lateinit var binding: FragmentMarsPhotoListBinding
     private var photosAdapter: PhotosAdapter? = null
     override fun onCreateView(
@@ -35,7 +36,7 @@ class MarsPhotoListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.photosList.layoutManager = GridLayoutManager(activity!!, 2)
-        photosAdapter = PhotosAdapter()
+        photosAdapter = PhotosAdapter(this)
         binding.photosList.adapter = photosAdapter
 
         photoListViewModel.getPhotosByRoverName("curiosity")
@@ -74,12 +75,17 @@ class MarsPhotoListFragment : Fragment() {
             }
     }
 
-    class PhotosAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-        private val photos = mutableListOf<Photo>()
+    class PhotosAdapter(private val photoItemClickListener: PhotoItemClickListener) :
+        RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+        val photos = mutableListOf<Photo>()
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             val binding =
                 PhotoListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            return PhotoListItemViewHolder(binding)
+
+            val photoListItemViewHolder = PhotoListItemViewHolder(binding)
+            photoListItemViewHolder.setItemClickListener(photoItemClickListener)
+            return photoListItemViewHolder
         }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -97,11 +103,17 @@ class MarsPhotoListFragment : Fragment() {
             notifyDataSetChanged()
         }
 
-        class PhotoListItemViewHolder(val binding: PhotoListItemBinding) :
+        inner class PhotoListItemViewHolder(private val binding: PhotoListItemBinding) :
             RecyclerView.ViewHolder(binding.root) {
-            fun bind(photo: Photo) {
-                binding.root.resources
+            private lateinit var photoItemClickListener: PhotoItemClickListener
 
+            init {
+                binding.root.setOnClickListener {
+                    photoItemClickListener.onPhotoItemClicked(adapterPosition)
+                }
+            }
+
+            fun bind(photo: Photo) {
                 binding.roverName.text = photo.rover.name
                 binding.cameraName.text = photo.camera.fullName
                 binding.photoDate.text = photo.earthDate
@@ -117,7 +129,23 @@ class MarsPhotoListFragment : Fragment() {
 
             }
 
+            fun setItemClickListener(photoItemClickListener: PhotoItemClickListener) {
+                this.photoItemClickListener = photoItemClickListener
+            }
         }
 
+
     }
+
+    override fun onPhotoItemClicked(position: Int) {
+        val photoDetailFragment = PhotoDetailFragment.newInstance(position)
+        activity?.supportFragmentManager?.beginTransaction()
+            ?.add(R.id.fragment_container, photoDetailFragment)
+            ?.addToBackStack(null)
+            ?.commit()
+    }
+}
+
+interface PhotoItemClickListener {
+    fun onPhotoItemClicked(position: Int)
 }
