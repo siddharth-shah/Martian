@@ -2,15 +2,13 @@ package com.example.martian.photos.ui
 
 import android.os.Bundle
 import android.util.TypedValue
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewbinding.ViewBinding
 import com.bumptech.glide.Glide
 import com.example.martian.R
 import com.example.martian.databinding.FragmentMarsPhotoListBinding
@@ -25,6 +23,7 @@ class MarsPhotoListFragment : Fragment(), PhotoItemClickListener {
     private val photoListViewModel: PhotoListViewModel by activityViewModels()
     private lateinit var binding: FragmentMarsPhotoListBinding
     private var photosAdapter: PhotosAdapter? = null
+    private val currentRover = "curiosity"
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -35,11 +34,11 @@ class MarsPhotoListFragment : Fragment(), PhotoItemClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.photosList.layoutManager = GridLayoutManager(activity!!, 2)
+        binding.photosList.layoutManager = LinearLayoutManager(activity!!)
         photosAdapter = PhotosAdapter(this)
         binding.photosList.adapter = photosAdapter
 
-        photoListViewModel.getPhotosByRoverName("curiosity")
+        photoListViewModel.getPhotosByRoverName(currentRover)
         photoListViewModel.getLoading().observe(this) { loading ->
             showLoading(loading)
         }
@@ -49,6 +48,10 @@ class MarsPhotoListFragment : Fragment(), PhotoItemClickListener {
         photoListViewModel.getPhotos().observe(this) { photos ->
             showData(photos)
 
+        }
+
+        binding.errorState.retryButton.setOnClickListener {
+            photoListViewModel.getPhotosByRoverName(currentRover)
         }
     }
 
@@ -114,17 +117,17 @@ class MarsPhotoListFragment : Fragment(), PhotoItemClickListener {
             }
 
             fun bind(photo: Photo) {
-                binding.roverName.text = photo.rover.name
-                binding.cameraName.text = photo.camera.fullName
-                binding.photoDate.text = photo.earthDate
-                val applyDimension = TypedValue.applyDimension(
+                binding.roverName.text = "Rover: ${photo.rover.name}"
+                binding.cameraName.text = "Camera: ${photo.camera.fullName}"
+                binding.photoDate.text = "Date: ${photo.earthDate}"
+                val dimen = TypedValue.applyDimension(
                     TypedValue.COMPLEX_UNIT_DIP,
-                    200f,
+                    300f,
                     binding.root.resources.displayMetrics
                 )
                 Glide.with(binding.root).load(photo.imageSrc)
-                    .override(applyDimension.toInt(), applyDimension.toInt())
-                    .centerCrop()
+                    .override(dimen.toInt(), dimen.toInt())
+                    .fitCenter()
                     .into(binding.roverPhoto)
 
             }

@@ -12,7 +12,6 @@ class MarsPhotosListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_mars_photos_list)
         supportFragmentManager.beginTransaction()
             .add(R.id.fragment_container, MarsPhotoListFragment.newInstance())
-            .addToBackStack(null)
             .commit()
     }
 }

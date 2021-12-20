@@ -23,7 +23,7 @@ class PhotoDetailFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        position = arguments?.getInt("position", -1) ?: -1
+        position = arguments?.getInt(POSITION, -1) ?: -1
 
     }
 
@@ -64,8 +64,10 @@ class PhotoDetailFragment : Fragment() {
         fun newInstance(position: Int) =
             PhotoDetailFragment().apply {
                 arguments = Bundle().apply {
-                    putInt("position", position)
+                    putInt(POSITION, position)
                 }
             }
+
+        private const val POSITION = "position"
     }
 }
